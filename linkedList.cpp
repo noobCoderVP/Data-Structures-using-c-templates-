@@ -1,194 +1,183 @@
+// this is a dynamic array implementation
 /* author: vaibhav patel
-   created on: 14-06-2021 */
+   created on: 12-06-2022 */
 
 #include <iostream>
 using namespace std;
 
 template <typename T>
-class LinkedList
+class Array
 {
-    struct Node
-    {
-        T elem;
-        Node *next;
-    };
-    Node *Head = NULL;
-    Node *Tail = NULL;
+    int MAX_SIZE = 10;  // keep track of maximum array size
+    int size = 0;       // keep track of number of elements
+    T *arr = new T[10]; // pointer to array of 10 elements
 
 public:
-    int size = 0;
-
-    /* function which returns the size of linked list */
+    /* function to get the size of the array */
     int getsize()
     {
         return size;
     }
 
-    /* function which adds element at front end */
-    void pushfront(T e)
+    /* function to get the capacity of the array */
+    int capacity()
     {
-        if (size == 0)
-        {
-            Head = new Node;
-            Head->elem = e;
-            Head->next = NULL;
-            Tail = Head;
-        }
-        else
-        {
-            Node *temp = new Node;
-            temp->elem = e;
-            temp->next = Head;
-            Head = temp;
-        }
-        size++;
+        return MAX_SIZE;
     }
 
-    /* function which adds element at rear end */
-    void pushback(T a)
+    /* function to get the element at index p */
+    T get(int p)
     {
-        if(size==0)
-            pushfront(a);
+        if (p < size && p > -1) // valid range of positions
+            return arr[p];
+        cout << "Error, out of bound access, garbage value returned" << '\n';
+        T a;
+        return a; // garbage value when out of index access
+    }
+
+    /* find function to return the first occurence index, starting at position p */
+    int find(T e, int p = 0)
+    {
+        for (int i = p; i < size; i++)
+        {
+            if (arr[i] == e)
+                return i;
+        }
+        return -1; // in all invalid cases of p it returns -1
+    }
+
+    /* function that checks if the array is empty */
+    bool isEmpty()
+    {
+        if (size == 0)
+            return true;
+        return false;
+    }
+
+    /* function that inserts a element at required position, default at end (if p ==-1)*/
+    void insert(T e, int p = -1)
+    {
+        if (size == MAX_SIZE)
+        {
+            T *temp = new T[size * 2];
+            for (int i = 0; i < size; i++)
+            {
+                temp[i] = arr[i];
+            }
+            delete[] arr;
+            arr = temp;
+            MAX_SIZE = 2 * size;
+        }
+        if (p == -1)
+        {
+            arr[size] = e;
+            size++;
+        }
+        else if (p > size or p < 0)
+        {
+            cout << "Error, please insert a correct index for insertion" << '\n';
+        }
         else
         {
-            Node *temp = new Node;
-            temp->elem = a;
-            temp->next = NULL;
-            Tail->next = temp;
-            Tail = temp;
+            for (int i = size - 1; i >= p; i--)
+            {
+                arr[i + 1] = arr[i];
+            }
+            arr[p] = e;
             size++;
         }
     }
 
-    /* function which inserts element at position p, default at beginning */
-    void insert(T a, int p = 0)
+    /* function to remove an element, default from end */
+    void remove(int p = -1)
     {
-        if (p == 0)
-            pushfront(a);
-        else if (p < 0 or p >= size)
-        {
-            cout<<"error, please enter a correct index"<<'\n';
-        }
+        if (p == -1)
+            p = size - 1;
+        if (p >= size and p < 0)
+            cout << "Error, please enter a correct index for removal" << '\n';
         else
         {
-            Node *temp = Head;
-            for (int i = 0; i < p - 1; i++)
+            for (int i = p; i < size; i++)
             {
-                temp = temp->next;
+                arr[i] = arr[i + 1];
             }
-            Node *temp2 = new Node;
-            temp2->elem = a;
-            temp2->next = temp->next;
-            temp->next = temp2;
-            size++;
+            size--;
+        }
+        if (MAX_SIZE == 2 * size)
+        {
+            T *temp = new T[size];
+            for (int i = 0; i < size; i++)
+            {
+                temp[i] = arr[i];
+            }
+            delete[] arr;
+            arr = temp;
+            MAX_SIZE = size;
         }
     }
 
-    /* function which removes element at position p */
-    void remove(int p = 0)
+    /* function to count number of occurence of an element, starting from position p */
+    int count(T e, int p = 0)
     {
-        if (size == 0)
-        {
-            cout << "List is already empty" << endl;
-        }
+        if (p >= size and p < 0)
+            return -1;
         else
         {
-            if (p == 0)
-            {   
-                Head = Head -> next;
-                size--;
-            }
-            else if (p < 0 or p >= size)
+            int count = 0;
+            for (int i = p; i < size; i++)
             {
-                cout << "Error, enter the correct index for removal" << '\n';
+                if (arr[i] == e)
+                    count++;
             }
-            else
-            {
-                Node *temp = Head;
-                for (int i = 0; i < p - 1; i++)
-                {
-                    temp = temp->next;
-                }
-                if(temp->next==Tail)
-                {
-                    Tail = temp;
-                }
-                Node *temp2 = temp -> next;
-                temp -> next = temp2 -> next;
-                delete temp2;
-                size--;
-            }
+            return count;
         }
     }
 
-    /* function which updates element at position p */
-    void update(T e, int p)
+    /* function to update the value at a given position, default at end */
+    void update(T e, int p = -1)
     {
-        if (p >= size or p < 0)
-            cout << "Please enter the correct index for updating" << '\n';
+        if (p == -1)
+            p = size - 1;
+        if (p < 0 or p >= size)
+            cout << "Error, please enter a correct index for update" << '\n';
         else
-        {
-            Node *temp = Head;
-            for (int i = 0; i < p; i++)
-            {
-                temp = temp->next;
-            }
-            temp->elem = e;
-        }
+            arr[p] = e;
     }
 
-    /* function which returns true if the linked list is empty */
-    bool isempty()
+    /* function to print whole array seperated by the seperator(char), default space */
+    void print(char sep = ' ')
     {
-        if(size==0) return 1;
-        return 0;
-    }
-
-    /* function which returns the number of occurence of a specific element */
-    int count(T e)
-    {
-        Node* temp = Head;
-        int count(0);
-        while(temp != NULL)
-        {
-            if(temp -> elem == e)
-                count++;
-            temp = temp -> next;
-        }
-        return count;
-    }
-
-    /* function which prints the elements of list with seperator */
-    void print(char sep=' ')
-    {
-        Node* temp = Head;
-        while(temp->next != NULL)
-        {
-            cout<<temp->elem<<sep;
-            temp = temp->next;
-        }
-        cout<<temp->elem<<'\n';
+        for (int i = 0; i < size - 1; i++)
+            cout << arr[i] << sep;
+        cout << arr[size - 1] << '\n';
     }
 };
 
 int main()
 {
     // driver code for the program
-    LinkedList <int> arr;
-    arr.pushback(1);
-    arr.pushback(2);
-    arr.pushfront(3);
-    arr.insert(5);
-    arr.insert(10,1);
-    arr.insert(7,4);
-    arr.insert(3);
-    cout<<arr.isempty()<<'\n';
-    cout<<arr.size<<'\n';
-    cout<<arr.count(3)<<'\n';
-    arr.print();
-    arr.update(20,1);
-    arr.pushfront(21);
-    arr.print();
-    arr.remove(4);
+    Array<int> arr;
+    cout << arr.isEmpty() << '\n';
+    for (int i = 0; i < 20; i++)
+    {
+        arr.insert(i);
+    }
+    arr.insert(2, 12);
+    cout << arr.get(12) << '\n';
     arr.print('-');
+    cout << arr.capacity() << '\n';
+    arr.remove(4);
+    arr.print();
+    cout << arr.capacity() << '\n'; // capacity is reduced
+    cout << arr.count(2) << '\n';
+
+    Array <char> arr2;
+    cout<<arr.isEmpty()<<'\n';
+    for(int i=0; i<20; i++)
+    {
+        arr2.insert('a');
+    }
+    arr2.insert('b', 2);
+    arr2.update('c', 1);
+    arr2.print(',');
 }
